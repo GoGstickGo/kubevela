@@ -29,6 +29,8 @@ template: {
 		resourceTypes?: [...string]
 		// +usage=Select resources by their names
 		resourceNames?: [...string]
+		// +usage=Select resources by cluster names
+		clusterNames?: [...string]
 	}
 
 	parameter: {

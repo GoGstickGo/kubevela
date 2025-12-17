@@ -121,6 +121,38 @@ func TestGarbageCollectPolicySpec_FindStrategy(t *testing.T) {
 			}},
 			expectStrategy: GarbageCollectStrategyNever,
 		},
+		"cluster name rule match": {
+			rules: []GarbageCollectPolicyRule{{
+				Selector: ResourcePolicyRuleSelector{
+					ClusterNames:  []string{"cluster-prod"},
+					ResourceTypes: []string{"Deployment"},
+				},
+				Strategy: GarbageCollectStrategyNever,
+			}},
+			input: &unstructured.Unstructured{Object: map[string]interface{}{
+				"kind": "Deployment",
+				"metadata": map[string]interface{}{
+					"labels": map[string]interface{}{oam.LabelAppCluster: "cluster-prod"},
+				},
+			}},
+			expectStrategy: GarbageCollectStrategyNever,
+		},
+		"cluster name rule mismatch": {
+			rules: []GarbageCollectPolicyRule{{
+				Selector: ResourcePolicyRuleSelector{
+					ClusterNames:  []string{"cluster-prod"},
+					ResourceTypes: []string{"Deployment"},
+				},
+				Strategy: GarbageCollectStrategyNever,
+			}},
+			input: &unstructured.Unstructured{Object: map[string]interface{}{
+				"kind": "Deployment",
+				"metadata": map[string]interface{}{
+					"labels": map[string]interface{}{oam.LabelAppCluster: "cluster-staging"},
+				},
+			}},
+			notFound: true,
+		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {

@@ -33,18 +33,20 @@ type ResourcePolicyRuleSelector struct {
 	TraitTypes       []string `json:"traitTypes,omitempty"`
 	ResourceTypes    []string `json:"resourceTypes,omitempty"`
 	ResourceNames    []string `json:"resourceNames,omitempty"`
+	ClusterNames     []string `json:"clusterNames,omitempty"`
 }
 
 // Match check if current rule selector match the target resource
 // If at least one condition is matched and no other condition failed (could be empty), return true
 // Otherwise, return false
 func (in *ResourcePolicyRuleSelector) Match(manifest *unstructured.Unstructured) bool {
-	var compName, compType, oamType, traitType, resourceType, resourceName string
+	var clusterName, compName, compType, oamType, traitType, resourceType, resourceName string
 	if labels := manifest.GetLabels(); labels != nil {
 		compName = labels[oam.LabelAppComponent]
 		compType = labels[oam.WorkloadTypeLabel]
 		oamType = labels[oam.LabelOAMResourceType]
 		traitType = labels[oam.TraitTypeLabel]
+		clusterName = labels[oam.LabelAppCluster]
 	}
 	resourceType = manifest.GetKind()
 	resourceName = manifest.GetName()
@@ -61,6 +63,7 @@ func (in *ResourcePolicyRuleSelector) Match(manifest *unstructured.Unstructured)
 		match(in.TraitTypes, traitType),
 		match(in.ResourceTypes, resourceType),
 		match(in.ResourceNames, resourceName),
+		match(in.ClusterNames, clusterName),
 	}
 	hasMatched := false
 	for _, cond := range conditions {
